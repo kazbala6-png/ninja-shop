@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Shop WebApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #131418;
+            color: #ffffff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            text-align: center;
+        }
+        h1 {
+            color: #ff9900;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #aaaaaa;
+            font-size: 14px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        /* Сетка для красивого отображения товаров в два ряда */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        /* Карточка товара с плавной 3D-анимацией */
+        .card {
+            background: #1e2026;
+            border: 1px solid #2d3039;
+            border-radius: 12px;
+            padding: 15px 10px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #ff9900;
+        }
+        .icon {
+            font-size: 35px;
+            margin-bottom: 8px;
+        }
+        .title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        .price {
+            color: #00ffcc;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        /* Кнопка добавления в корзину */
+        .btn-buy {
+            background: #2a2d37;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-buy:hover {
+            background: #ff9900;
+            color: black;
+        }
+        /* Панелька с суммой внизу страницы */
+        .order-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e2026;
+            padding: 15px;
+            border-top: 2px solid #2d3039;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-text {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .total-price {
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Konoha Shop 🦊</h1>
+    <p class="subtitle">Официальный Web App магазин Конохи</p>
+
+    <div class="shop-grid">
+        <div class="card">
+            <div class="icon">🗡️</div>
+            <div class="title">Кунай ЛВЛ-1</div>
+            <div class="price">150 Рё</div>
+            <button class="btn-buy" onclick="addToCart(150)">В корзину</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📜</div>
+            <div class="title">Свиток техник</div>
+            <div class="price">450 Рё</div>
+            <button class="btn-buy" onclick="addToCart(450)">В корзину</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">💥</div>
+            <div class="title">Взрывная печать</div>
+            <div class="price">80 Рё</div>
+            <button class="btn-buy" onclick="addToCart(80)">В корзину</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">🥤</div>
+            <div class="title">Эликсир Чакры</div>
+            <div class="price">300 Рё</div>
+            <button class="btn-buy" onclick="addToCart(300)">В корзину</button>
+        </div>
+    </div>
+
+    <div style="height: 80px;"></div>
+
+    <div class="order-bar">
+        <div class="total-text">Итого: <span class="total-price"><span id="total">0</span> Рё</span></div>
+        <p style="margin: 0; font-size: 12px; color: #888;">Кнопка ТГ появится в боте</p>
+    </div>
+
+    <script>
+        // Инициализируем Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Говорим Телеграму раскрыть приложение на максимум вверх
+
+        let totalSum = 0;
+
+        function addToCart(price) {
+            totalSum += price;
+            document.getElementById('total').innerText = totalSum;
+
+            // Если в корзине что-то есть, включаем Главную кнопку прямо в интерфейсе Телеграма
+            if (totalSum > 0) {
+                tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ: ${totalSum} Рё`);
+                tg.MainButton.textColor = "#000000"; // Черный текст
+                tg.MainButton.color = "#ff9900";     // Оранжевая кнопка
+                tg.MainButton.show();                // Показываем её пользователю
+            }
+        }
+
+        // Ловим клик по той самой главной кнопке Телеграма
+        tg.onEvent('mainButtonClicked', function() {
+            const orderData = {
+                sum: totalSum,
+                shop: "Konoha Shop"
+            };
+            
+            // Отправляем данные обратно в нашего Python бота и закрываем окно
+            tg.sendData(JSON.stringify(orderData));
+        });
+    </script>
+
+</body>
+</html>
