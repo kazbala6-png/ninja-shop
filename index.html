@@ -108,28 +108,28 @@
             <div class="icon">🗡️</div>
             <div class="title">Кунай ЛВЛ-1</div>
             <div class="price">150 Рё</div>
-            <button class="btn-buy" onclick="addToCart(150)">В корзину</button>
+            <button class="btn-buy" onclick="addToCart('🗡️ Кунай ЛВЛ-1', 150)">В корзину</button>
         </div>
 
         <div class="card">
             <div class="icon">📜</div>
             <div class="title">Свиток техник</div>
             <div class="price">450 Рё</div>
-            <button class="btn-buy" onclick="addToCart(450)">В корзину</button>
+            <button class="btn-buy" onclick="addToCart('📜 Свиток техник', 450)">В корзину</button>
         </div>
 
         <div class="card">
             <div class="icon">💥</div>
             <div class="title">Взрывная печать</div>
             <div class="price">80 Рё</div>
-            <button class="btn-buy" onclick="addToCart(80)">В корзину</button>
+            <button class="btn-buy" onclick="addToCart('💥 Взрывная печать', 80)">В корзину</button>
         </div>
 
         <div class="card">
             <div class="icon">🥤</div>
             <div class="title">Эликсир Чакры</div>
             <div class="price">300 Рё</div>
-            <button class="btn-buy" onclick="addToCart(300)">В корзину</button>
+            <button class="btn-buy" onclick="addToCart('🥤 Эликсир Чакры', 300)">В корзину</button>
         </div>
     </div>
 
@@ -141,40 +141,42 @@
     </div>
 
     <script>
+        // Инициализируем Telegram WebApp один раз
         const tg = window.Telegram.WebApp;
-tg.ready(); // Добавь эту строчку
-tg.expand();
-        // Инициализируем Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Говорим Телеграму раскрыть приложение на максимум вверх
-        alert("JS загружен!");
+        tg.ready();
+        tg.expand();
 
         let totalSum = 0;
+        let selectedItems = []; // Список для названий купленных товаров
 
-        function addToCart(price) {
+        function addToCart(itemName, price) {
             totalSum += price;
+            selectedItems.push(itemName); // Запоминаем имя товара
+            
             document.getElementById('total').innerText = totalSum;
 
-            // Если в корзине что-то есть, включаем Главную кнопку прямо в интерфейсе Телеграма
+            // Включаем Главную кнопку прямо в интерфейсе Телеграма
             if (totalSum > 0) {
                 tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ: ${totalSum} Рё`);
-                tg.MainButton.textColor = "#000000"; // Черный текст
-                tg.MainButton.color = "#ff9900";     // Оранжевая кнопка
-                tg.MainButton.show();                // Показываем её пользователю
+                tg.MainButton.textColor = "#000000"; 
+                tg.MainButton.color = "#ff9900";     
+                tg.MainButton.show();                
             }
         }
 
-        // Ловим клик по той самой главной кнопке Телеграма
+        // Ловим клик по главной кнопке Телеграма
         tg.onEvent('mainButtonClicked', function() {
+            // Формируем красивую строку из списка товаров (например: "🗡️ Кунай ЛВЛ-1, 📜 Свиток техник")
+            const itemsString = selectedItems.join(", ");
+
             const orderData = {
-                sum: totalSum,
-                shop: "Konoha Shop"
+                items: itemsString,     // Бот в Pybroid ждет ключ 'items'
+                totalPrice: totalSum    // Бот в Pybroid ждет ключ 'totalPrice'
             };
             
             // Отправляем данные обратно в нашего Python бота и закрываем окно
             tg.sendData(JSON.stringify(orderData));
         });
     </script>
-
 </body>
 </html>
