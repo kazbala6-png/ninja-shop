@@ -141,9 +141,13 @@
     </div>
 
     <script>
+        const tg = window.Telegram.WebApp;
+tg.ready(); // Добавь эту строчку
+tg.expand();
         // Инициализируем Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand(); // Говорим Телеграму раскрыть приложение на максимум вверх
+        alert("JS загружен!");
 
         let totalSum = 0;
 
