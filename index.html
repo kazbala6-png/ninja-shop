@@ -3,180 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ninja Shop WebApp</title>
+    <title>Konoha Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: #131418;
-            color: #ffffff;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 15px;
-            text-align: center;
-        }
-        h1 {
-            color: #ff9900;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            color: #aaaaaa;
-            font-size: 14px;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        /* Сетка для красивого отображения товаров в два ряда */
-        .shop-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-        /* Карточка товара с плавной 3D-анимацией */
-        .card {
-            background: #1e2026;
-            border: 1px solid #2d3039;
-            border-radius: 12px;
-            padding: 15px 10px;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            border-color: #ff9900;
-        }
-        .icon {
-            font-size: 35px;
-            margin-bottom: 8px;
-        }
-        .title {
-            font-weight: bold;
-            font-size: 15px;
-            margin-bottom: 5px;
-        }
-        .price {
-            color: #00ffcc;
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        /* Кнопка добавления в корзину */
-        .btn-buy {
-            background: #2a2d37;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .btn-buy:hover {
-            background: #ff9900;
-            color: black;
-        }
-        /* Панелька с суммой внизу страницы */
-        .order-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1e2026;
-            padding: 15px;
-            border-top: 2px solid #2d3039;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .total-text {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .total-price {
-            color: #00ffcc;
-        }
+        body { font-family: sans-serif; background: #131418; color: white; padding: 15px; margin: 0; text-align: center; }
+        h1 { color: #ff9900; margin-bottom: 5px; }
+        .subtitle { color: #aaa; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .card { background: #1e2026; border: 1px solid #2d3039; border-radius: 12px; padding: 12px; }
+        .price { color: #00ffcc; font-weight: bold; margin: 8px 0; }
+        button { background: #2a2d37; color: white; border: none; padding: 8px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; }
+        button:hover { background: #ff9900; color: black; }
+        .total-bar { background: #1e2026; padding: 15px; border-radius: 12px; margin-top: 15px; }
+        #order-btn { background: #ff4500; color: white; padding: 12px; font-size: 16px; margin-top: 10px; }
+        
+        /* Модальное окно оплаты */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal-content { background: #1e2026; padding: 25px; border-radius: 16px; width: 85%; max-width: 340px; border: 1px solid #ff9900; }
+        .kaspi-btn { background: #ff0000; color: white; padding: 12px; border-radius: 8px; font-size: 16px; text-decoration: none; display: block; margin: 15px 0; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>Konoha Shop 🦊</h1>
-    <p class="subtitle">Официальный Web App магазин Конохи</p>
-
-    <div class="shop-grid">
+    <p class="subtitle">Официальный мини-маркет</p>
+    
+    <div class="product-grid">
         <div class="card">
-            <div class="icon">🗡️</div>
-            <div class="title">Кунай ЛВЛ-1</div>
+            <div>🗡️</div>
+            <h4>Кунай ЛВЛ-1</h4>
             <div class="price">150 Рё</div>
-            <button class="btn-buy" onclick="addToCart('🗡️ Кунай ЛВЛ-1', 150)">В корзину</button>
+            <button onclick="addToCart('Кунай ЛВЛ-1', 150)">В корзину</button>
         </div>
-
         <div class="card">
-            <div class="icon">📜</div>
-            <div class="title">Свиток техник</div>
+            <div>📜</div>
+            <h4>Свиток техник</h4>
             <div class="price">450 Рё</div>
-            <button class="btn-buy" onclick="addToCart('📜 Свиток техник', 450)">В корзину</button>
+            <button onclick="addToCart('Свиток техник', 450)">В корзину</button>
         </div>
-
         <div class="card">
-            <div class="icon">💥</div>
-            <div class="title">Взрывная печать</div>
-            <div class="price">80 Рё</div>
-            <button class="btn-buy" onclick="addToCart('💥 Взрывная печать', 80)">В корзину</button>
+            <div>⭐</div>
+            <h4>Сюрикен</h4>
+            <div class="price">100 Рё</div>
+            <button onclick="addToCart('Сюрикен', 100)">В корзину</button>
         </div>
-
         <div class="card">
-            <div class="icon">🥤</div>
-            <div class="title">Эликсир Чакры</div>
-            <div class="price">300 Рё</div>
-            <button class="btn-buy" onclick="addToCart('🥤 Эликсир Чакры', 300)">В корзину</button>
+            <div>🧣</div>
+            <h4>Повязка</h4>
+            <div class="price">500 Рё</div>
+            <button onclick="addToCart('Повязка', 500)">В корзину</button>
         </div>
     </div>
 
-    <div style="height: 80px;"></div>
+    <div class="total-bar">
+        <h3>Итого к оплате: <span id="total" style="color: #00ffcc;">0</span> Рё</h3>
+        <button id="order-btn" onclick="openPayment()">💳 ОПЛАТИТЬ ПРЯМО ЗДЕСЬ</button>
+    </div>
 
-    <div class="order-bar">
-        <div class="total-text">Итого: <span class="total-price"><span id="total">0</span> Рё</span></div>
-        <p style="margin: 0; font-size: 12px; color: #888;">Кнопка ТГ появится в боте</p>
+    <!-- ОКНО ОПЛАТЫ (ОТКРЫВАЕТСЯ ПРИ КЛИКЕ) -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ff9900; margin-top: 0;">Оплата заказа</h3>
+            <p>Переведите сумму <b id="modal-sum" style="color: #00ffcc;">0</b> Рё (тенге) по номеру ниже:</p>
+            
+            <p style="font-size: 18px; font-weight: bold; background: #131418; padding: 10px; border-radius: 8px; letter-spacing: 1px;">
+                +7 (707) XXX-XX-XX
+            </p>
+            <p style="font-size: 14px; color: #aaa;">Получатель: Дарига К.</p>
+
+            <button onclick="confirmPayment()" style="background: #00ffcc; color: black; padding: 12px; font-size: 15px; margin-top: 10px;">
+                ✅ Я оплатил(а), закрыть
+            </button>
+            <button onclick="closePayment()" style="background: transparent; color: #ff4500; margin-top: 10px;">
+                Отмена
+            </button>
+        </div>
     </div>
 
     <script>
-        // Инициализируем Telegram WebApp один раз
-        const tg = window.Telegram.WebApp;
-        tg.ready();
+        let tg = window.Telegram.WebApp;
         tg.expand();
 
-        let totalSum = 0;
-        let selectedItems = []; // Список для названий купленных товаров
+        let cartItems = [];
+        let totalPrice = 0;
 
-        function addToCart(itemName, price) {
-            totalSum += price;
-            selectedItems.push(itemName); // Запоминаем имя товара
-            
-            document.getElementById('total').innerText = totalSum;
-
-            // Включаем Главную кнопку прямо в интерфейсе Телеграма
-            if (totalSum > 0) {
-                tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ: ${totalSum} Рё`);
-                tg.MainButton.textColor = "#000000"; 
-                tg.MainButton.color = "#ff9900";     
-                tg.MainButton.show();                
-            }
+        function addToCart(name, price) {
+            cartItems.push(name);
+            totalPrice += price;
+            document.getElementById('total').innerText = totalPrice;
         }
 
-        // Ловим клик по главной кнопке Телеграма
-        tg.onEvent('mainButtonClicked', function() {
-            // Формируем красивую строку из списка товаров (например: "🗡️ Кунай ЛВЛ-1, 📜 Свиток техник")
-            const itemsString = selectedItems.join(", ");
+        function openPayment() {
+            if (cartItems.length === 0) {
+                alert("Ваша корзина пуста!");
+                return;
+            }
+            document.getElementById('modal-sum').innerText = totalPrice;
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
 
-            const orderData = {
-                items: itemsString,     // Бот в Pybroid ждет ключ 'items'
-                totalPrice: totalSum    // Бот в Pybroid ждет ключ 'totalPrice'
-            };
-            
-            // Отправляем данные обратно в нашего Python бота и закрываем окно
-            tg.sendData(JSON.stringify(orderData));
-        });
+        function closePayment() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        function confirmPayment() {
+            alert("Спасибо! Ваши данные приняты, менеджер проверит поступление.");
+            // Закрываем мини-сайт, возвращая в телеграм
+            tg.close();
+        }
     </script>
 </body>
 </html>
