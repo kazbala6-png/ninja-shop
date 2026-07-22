@@ -2,115 +2,352 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Konoha Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Brand Store — Витрина</title>
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #131418; color: white; padding: 15px; margin: 0; text-align: center; }
-        h1 { color: #ff9900; margin-bottom: 5px; }
-        .subtitle { color: #aaa; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .card { background: #1e2026; border: 1px solid #2d3039; border-radius: 12px; padding: 12px; }
-        .price { color: #00ffcc; font-weight: bold; margin: 8px 0; }
-        button { background: #2a2d37; color: white; border: none; padding: 8px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; }
-        button:hover { background: #ff9900; color: black; }
-        .total-bar { background: #1e2026; padding: 15px; border-radius: 12px; margin-top: 15px; }
-        #order-btn { background: #ff4500; color: white; padding: 12px; font-size: 16px; margin-top: 10px; }
-        
-        /* Модальное окно оплаты */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
-        .modal-content { background: #1e2026; padding: 25px; border-radius: 16px; width: 85%; max-width: 340px; border: 1px solid #ff9900; }
-        .kaspi-btn { background: #ff0000; color: white; padding: 12px; border-radius: 8px; font-size: 16px; text-decoration: none; display: block; margin: 15px 0; font-weight: bold; }
+        :root {
+            --bg-color: #0f0f11;
+            --card-bg: #18181c;
+            --accent-color: #2f80ed;
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;
+            --border-color: #2c2c30;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 12px;
+            padding-bottom: 130px; /* Отступ снизу, чтобы нижняя панель не перекрывала контент */
+        }
+
+        header {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Сетка товаров */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Исправленная картинка товара */
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            object-position: center top; /* Фокус на верхней части товара */
+            background-color: #222;
+        }
+
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .product-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+
+        /* Выбор размера */
+        .size-selector {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .size-btn {
+            flex: 1;
+            background: #242429;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 11px;
+            padding: 5px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .size-btn.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .add-btn {
+            width: 100%;
+            background-color: #242429;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:active {
+            transform: scale(0.96);
+        }
+
+        .add-btn.added {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+
+        /* Нижня Панель Кнопки Отправки */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(24, 24, 28, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .cart-summary {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .cart-total {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .submit-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none; /* Скрыта пока корзина пустая */
+            transition: transform 0.1s ease;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.96);
+        }
     </style>
 </head>
 <body>
 
-    <h1>Konoha Shop 🦊</h1>
-    <p class="subtitle">Официальный мини-маркет</p>
-    
-    <div class="product-grid">
-        <div class="card">
-            <div>🗡️</div>
-            <h4>Кунай ЛВЛ-1</h4>
-            <div class="price">150 Рё</div>
-            <button onclick="addToCart('Кунай ЛВЛ-1', 150)">В корзину</button>
-        </div>
-        <div class="card">
-            <div>📜</div>
-            <h4>Свиток техник</h4>
-            <div class="price">450 Рё</div>
-            <button onclick="addToCart('Свиток техник', 450)">В корзину</button>
-        </div>
-        <div class="card">
-            <div>⭐</div>
-            <h4>Сюрикен</h4>
-            <div class="price">100 Рё</div>
-            <button onclick="addToCart('Сюрикен', 100)">В корзину</button>
-        </div>
-        <div class="card">
-            <div>🧣</div>
-            <h4>Повязка</h4>
-            <div class="price">500 Рё</div>
-            <button onclick="addToCart('Повязка', 500)">В корзину</button>
-        </div>
-    </div>
+    <header>
+        <h1>CLOTHING STORE</h1>
+        <p>Выберите вещи и отправьте запрос менеджеру</p>
+    </header>
 
-    <div class="total-bar">
-        <h3>Итого к оплате: <span id="total" style="color: #00ffcc;">0</span> Рё</h3>
-        <button id="order-btn" onclick="openPayment()">💳 ОПЛАТИТЬ ПРЯМО ЗДЕСЬ</button>
-    </div>
+    <!-- Сетка Товаров -->
+    <div class="products-grid" id="products"></div>
 
-    <!-- ОКНО ОПЛАТЫ (ОТКРЫВАЕТСЯ ПРИ КЛИКЕ) -->
-    <div id="paymentModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: #ff9900; margin-top: 0;">Оплата заказа</h3>
-            <p>Переведите сумму <b id="modal-sum" style="color: #00ffcc;">0</b> Рё (тенге) по номеру ниже:</p>
-            
-            <p style="font-size: 18px; font-weight: bold; background: #131418; padding: 10px; border-radius: 8px; letter-spacing: 1px;">
-                +7 (707) XXX-XX-XX
-            </p>
-            <p style="font-size: 14px; color: #aaa;">Получатель: Дарига К.</p>
-
-            <button onclick="confirmPayment()" style="background: #00ffcc; color: black; padding: 12px; font-size: 15px; margin-top: 10px;">
-                ✅ Я оплатил(а), закрыть
-            </button>
-            <button onclick="closePayment()" style="background: transparent; color: #ff4500; margin-top: 10px;">
-                Отмена
-            </button>
+    <!-- Фиксированная панель снизу -->
+    <div class="footer-bar">
+        <div class="cart-summary">
+            <span class="cart-count" id="cart-count">Товаров: 0</span>
+            <span class="cart-total" id="cart-total">0 ₸</span>
         </div>
+        <button class="submit-btn" id="submit-btn" onclick="sendOrder()">Обсудить с менеджером 💬</button>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на полный экран
 
-        let cartItems = [];
-        let totalPrice = 0;
-
-        function addToCart(name, price) {
-            cartItems.push(name);
-            totalPrice += price;
-            document.getElementById('total').innerText = totalPrice;
-        }
-
-        function openPayment() {
-            if (cartItems.length === 0) {
-                alert("Ваша корзина пуста!");
-                return;
+        // Список товаров с картинками
+        const products = [
+            {
+                id: 1,
+                name: "Оверсайз Футболка Black",
+                price: 8500,
+                image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
+                sizes: ["M", "L", "XL"]
+            },
+            {
+                id: 2,
+                name: "Худи Minimal White",
+                price: 16500,
+                image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=500&q=80",
+                sizes: ["S", "M", "L"]
+            },
+            {
+                id: 3,
+                name: "Футболка Vintage Print",
+                price: 9500,
+                image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500&q=80",
+                sizes: ["M", "L", "XL"]
+            },
+            {
+                id: 4,
+                name: "Свитшот Streetwear",
+                price: 14000,
+                image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&q=80",
+                sizes: ["S", "M", "L"]
             }
-            document.getElementById('modal-sum').innerText = totalPrice;
-            document.getElementById('paymentModal').style.display = 'flex';
+        ];
+
+        let cart = {}; // Храним выбранные товары и их размеры
+
+        // Рендер каталога
+        function renderProducts() {
+            const container = document.getElementById('products');
+            container.innerHTML = products.map(p => {
+                const selectedSize = cart[p.id]?.size || p.sizes[0];
+                const isAdded = !!cart[p.id];
+
+                return `
+                    <div class="product-card">
+                        <img src="${p.image}" class="product-img" alt="${p.name}">
+                        <div class="product-info">
+                            <div>
+                                <div class="product-title">${p.name}</div>
+                                <div class="product-price">${p.price.toLocaleString()} ₸</div>
+                            </div>
+                            
+                            <div>
+                                <!-- Выбор размера -->
+                                <div class="size-selector">
+                                    ${p.sizes.map(s => `
+                                        <div class="size-btn ${selectedSize === s ? 'active' : ''}" 
+                                             onclick="selectSize(${p.id}, '${s}')">${s}</div>
+                                    `).join('')}
+                                </div>
+
+                                <button class="add-btn ${isAdded ? 'added' : ''}" onclick="toggleCart(${p.id})">
+                                    ${isAdded ? '✓ В запросе' : '+ Добавить'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function closePayment() {
-            document.getElementById('paymentModal').style.display = 'none';
+        // Выбор размера
+        function selectSize(productId, size) {
+            if (!cart[productId]) {
+                cart[productId] = { ...products.find(p => p.id === productId), size: size };
+            } else {
+                cart[productId].size = size;
+            }
+            renderProducts();
+            updateFooter();
         }
 
-        function confirmPayment() {
-            alert("Спасибо! Ваши данные приняты, менеджер проверит поступление.");
-            // Закрываем мини-сайт, возвращая в телеграм
+        // Добавление / Удаление
+        function toggleCart(productId) {
+            if (cart[productId]) {
+                delete cart[productId];
+            } else {
+                const product = products.find(p => p.id === productId);
+                cart[productId] = { ...product, size: product.sizes[0] };
+            }
+            renderProducts();
+            updateFooter();
+        }
+
+        // Обновление счетчика и кнопки
+        function updateFooter() {
+            const items = Object.values(cart);
+            const total = items.reduce((sum, item) => sum + item.price, 0);
+            const count = items.length;
+
+            document.getElementById('cart-count').innerText = `Товаров: ${count}`;
+            document.getElementById('cart-total').innerText = `${total.toLocaleString()} ₸`;
+
+            const submitBtn = document.getElementById('submit-btn');
+            if (count > 0) {
+                submitBtn.style.display = 'block';
+            } else {
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        // Отправка данных боту
+        function sendOrder() {
+            const items = Object.values(cart);
+            if (items.length === 0) return;
+
+            const orderData = {
+                type: "NEW_ORDER",
+                items: items.map(i => ({
+                    name: i.name,
+                    price: i.price,
+                    size: i.size,
+                    image: i.image // ПЕРЕДАЕМ ССЫЛКУ НА ФОТО ТОВАРА
+                })),
+                totalPrice: items.reduce((sum, i) => sum + i.price, 0)
+            };
+
+            // Отправляем JSON боту и закрываем Web App
+            tg.sendData(JSON.stringify(orderData));
             tg.close();
         }
+
+        renderProducts();
     </script>
 </body>
 </html>
