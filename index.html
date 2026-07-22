@@ -31,7 +31,7 @@
         }
 
         header {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             text-align: center;
         }
 
@@ -46,6 +46,41 @@
             margin-top: 4px;
         }
 
+        /* --- КАТЕГОРИИ (ФИЛЬТР) --- */
+        .categories-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+            scrollbar-width: none; /* Скрывает скроллбар в Firefox */
+        }
+
+        .categories-bar::-webkit-scrollbar {
+            display: none; /* Скрывает скроллбар в Chrome/Safari */
+        }
+
+        .cat-btn {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cat-btn.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            border-color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* --- СЕТКА ТОВАРОВ --- */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -82,6 +117,7 @@
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 4px;
+            line-height: 1.2;
         }
 
         .product-price {
@@ -95,10 +131,12 @@
             display: flex;
             gap: 4px;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .size-btn {
             flex: 1;
+            min-width: 28px;
             background: #242429;
             border: 1px solid var(--border-color);
             color: var(--text-main);
@@ -125,6 +163,7 @@
             font-weight: 600;
             font-size: 12px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
 
         .add-btn.added {
@@ -132,6 +171,7 @@
             border-color: #27ae60;
         }
 
+        /* --- НИЖНЯЯ ПАНЕЛЬ С КОРЗИНОЙ --- */
         .footer-bar {
             position: fixed;
             bottom: 0;
@@ -182,8 +222,19 @@
         <p>Выберите вещи и отправьте запрос менеджеру</p>
     </header>
 
+    <!-- Горизонтальные категории -->
+    <div class="categories-bar">
+        <button class="cat-btn active" onclick="filterCategory('all', event)">Все</button>
+        <button class="cat-btn" onclick="filterCategory('shoes', event)">Кроссовки</button>
+        <button class="cat-btn" onclick="filterCategory('outerwear', event)">Верх</button>
+        <button class="cat-btn" onclick="filterCategory('pants', event)">Низ</button>
+        <button class="cat-btn" onclick="filterCategory('hats', event)">Головные уборы</button>
+    </div>
+
+    <!-- Сетка товаров -->
     <div class="products-grid" id="products"></div>
 
+    <!-- Фиксированный футер -->
     <div class="footer-bar">
         <div class="cart-summary">
             <span class="cart-count" id="cart-count">Товаров: 0</span>
@@ -196,42 +247,79 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // МАССИВ ТОВАРОВ (Меняй ссылки на свои фото в параметре image)
         const products = [
+            // --- КРОССОВКИ (shoes) ---
             {
                 id: 1,
-                name: "Оверсайз Футболка Black",
-                price: 8500,
-                image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
-                sizes: ["M", "L", "XL"]
+                category: "shoes",
+                name: "Кроссовки Nike Air Max",
+                price: 45000,
+                image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
+                sizes: ["40", "41", "42", "43"]
             },
+            
+            // --- ВЕРХНЯЯ ОДЕЖДА (outerwear) ---
             {
                 id: 2,
-                name: "Худи Minimal White",
-                price: 16500,
-                image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=500&q=80",
-                sizes: ["S", "M", "L"]
+                category: "outerwear",
+                name: "Оверсайз Футболка Black",
+                price: 8500,
+                image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&auto=format&fit=crop&q=80",
+                sizes: ["M", "L", "XL"]
             },
             {
                 id: 3,
-                name: "Футболка Vintage Print",
-                price: 9500,
-                image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500&q=80",
-                sizes: ["M", "L", "XL"]
+                category: "outerwear",
+                name: "Худи Minimal White",
+                price: 16500,
+                image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80",
+                sizes: ["S", "M", "L"]
             },
+
+            // --- НИЖНЯЯ ОДЕЖДА (pants) ---
             {
                 id: 4,
-                name: "Свитшот Streetwear",
-                price: 14000,
-                image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&q=80",
-                sizes: ["S", "M", "L"]
+                category: "pants",
+                name: "Штаны Cargo Streetwear",
+                price: 18000,
+                image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&auto=format&fit=crop&q=80",
+                sizes: ["M", "L", "XL"]
+            },
+
+            // --- ГОЛОВНЫЕ УБОРЫ (hats) ---
+            {
+                id: 5,
+                category: "hats",
+                name: "Кепка Minimalist Logo",
+                price: 7500,
+                image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&auto=format&fit=crop&q=80",
+                sizes: ["One Size"]
             }
         ];
 
         let cart = {};
+        let currentCategory = 'all';
+
+        function filterCategory(cat, event) {
+            currentCategory = cat;
+            
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderProducts();
+        }
 
         function renderProducts() {
             const container = document.getElementById('products');
-            container.innerHTML = products.map(p => {
+            
+            const filteredProducts = currentCategory === 'all' 
+                ? products 
+                : products.filter(p => p.category === currentCategory);
+
+            container.innerHTML = filteredProducts.map(p => {
                 const selectedSize = cart[p.id]?.size || p.sizes[0];
                 const isAdded = !!cart[p.id];
 
@@ -295,7 +383,6 @@
             submitBtn.style.display = count > 0 ? 'block' : 'none';
         }
 
-        // ОБНОВЛЕННАЯ УНИВЕРСАЛЬНАЯ ОТПРАВКА
         function sendOrder() {
             const items = Object.values(cart);
             if (items.length === 0) return;
@@ -310,14 +397,11 @@
                 totalPrice: items.reduce((sum, i) => sum + i.price, 0)
             };
 
-            // Если открыто через стандартную кнопку
-            if (tg.sendData) {
-                tg.sendData(JSON.stringify(orderData));
-            }
-            
+            tg.sendData(JSON.stringify(orderData));
             tg.close();
         }
 
+        // Старт отрисовки
         renderProducts();
     </script>
 </body>
