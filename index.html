@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Brand Store — Витрина</title>
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -28,7 +27,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             padding: 12px;
-            padding-bottom: 130px; /* Отступ снизу, чтобы нижняя панель не перекрывала контент */
+            padding-bottom: 130px;
         }
 
         header {
@@ -39,7 +38,6 @@
         header h1 {
             font-size: 20px;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
 
         header p {
@@ -48,7 +46,6 @@
             margin-top: 4px;
         }
 
-        /* Сетка товаров */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -65,12 +62,11 @@
             justify-content: space-between;
         }
 
-        /* Исправленная картинка товара */
         .product-img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            object-position: center top; /* Фокус на верхней части товара */
+            object-position: center top;
             background-color: #222;
         }
 
@@ -86,7 +82,6 @@
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 4px;
-            line-height: 1.2;
         }
 
         .product-price {
@@ -96,7 +91,6 @@
             margin-bottom: 8px;
         }
 
-        /* Выбор размера */
         .size-selector {
             display: flex;
             gap: 4px;
@@ -113,7 +107,6 @@
             border-radius: 6px;
             cursor: pointer;
             text-align: center;
-            transition: all 0.15s ease;
         }
 
         .size-btn.active {
@@ -132,11 +125,6 @@
             font-weight: 600;
             font-size: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .add-btn:active {
-            transform: scale(0.96);
         }
 
         .add-btn.added {
@@ -144,7 +132,6 @@
             border-color: #27ae60;
         }
 
-        /* Нижня Панель Кнопки Отправки */
         .footer-bar {
             position: fixed;
             bottom: 0;
@@ -152,7 +139,6 @@
             right: 0;
             background-color: rgba(24, 24, 28, 0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             padding: 12px 16px;
             border-top: 1px solid var(--border-color);
             display: flex;
@@ -185,12 +171,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            display: none; /* Скрыта пока корзина пустая */
-            transition: transform 0.1s ease;
-        }
-
-        .submit-btn:active {
-            transform: scale(0.96);
+            display: none;
         }
     </style>
 </head>
@@ -201,10 +182,8 @@
         <p>Выберите вещи и отправьте запрос менеджеру</p>
     </header>
 
-    <!-- Сетка Товаров -->
     <div class="products-grid" id="products"></div>
 
-    <!-- Фиксированная панель снизу -->
     <div class="footer-bar">
         <div class="cart-summary">
             <span class="cart-count" id="cart-count">Товаров: 0</span>
@@ -215,9 +194,8 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на полный экран
+        tg.expand();
 
-        // Список товаров с картинками
         const products = [
             {
                 id: 1,
@@ -249,9 +227,8 @@
             }
         ];
 
-        let cart = {}; // Храним выбранные товары и их размеры
+        let cart = {};
 
-        // Рендер каталога
         function renderProducts() {
             const container = document.getElementById('products');
             container.innerHTML = products.map(p => {
@@ -268,7 +245,6 @@
                             </div>
                             
                             <div>
-                                <!-- Выбор размера -->
                                 <div class="size-selector">
                                     ${p.sizes.map(s => `
                                         <div class="size-btn ${selectedSize === s ? 'active' : ''}" 
@@ -286,7 +262,6 @@
             }).join('');
         }
 
-        // Выбор размера
         function selectSize(productId, size) {
             if (!cart[productId]) {
                 cart[productId] = { ...products.find(p => p.id === productId), size: size };
@@ -297,7 +272,6 @@
             updateFooter();
         }
 
-        // Добавление / Удаление
         function toggleCart(productId) {
             if (cart[productId]) {
                 delete cart[productId];
@@ -309,7 +283,6 @@
             updateFooter();
         }
 
-        // Обновление счетчика и кнопки
         function updateFooter() {
             const items = Object.values(cart);
             const total = items.reduce((sum, item) => sum + item.price, 0);
@@ -319,31 +292,29 @@
             document.getElementById('cart-total').innerText = `${total.toLocaleString()} ₸`;
 
             const submitBtn = document.getElementById('submit-btn');
-            if (count > 0) {
-                submitBtn.style.display = 'block';
-            } else {
-                submitBtn.style.display = 'none';
-            }
+            submitBtn.style.display = count > 0 ? 'block' : 'none';
         }
 
-        // Отправка данных боту
+        // ОБНОВЛЕННАЯ УНИВЕРСАЛЬНАЯ ОТПРАВКА
         function sendOrder() {
             const items = Object.values(cart);
             if (items.length === 0) return;
 
             const orderData = {
-                type: "NEW_ORDER",
                 items: items.map(i => ({
                     name: i.name,
                     price: i.price,
                     size: i.size,
-                    image: i.image // ПЕРЕДАЕМ ССЫЛКУ НА ФОТО ТОВАРА
+                    image: i.image
                 })),
                 totalPrice: items.reduce((sum, i) => sum + i.price, 0)
             };
 
-            // Отправляем JSON боту и закрываем Web App
-            tg.sendData(JSON.stringify(orderData));
+            // Если открыто через стандартную кнопку
+            if (tg.sendData) {
+                tg.sendData(JSON.stringify(orderData));
+            }
+            
             tg.close();
         }
 
